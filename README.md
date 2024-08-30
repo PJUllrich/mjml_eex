@@ -332,3 +332,12 @@ additional set up.
 - The logo for the project is an edited version of an SVG image from the [unDraw project](https://undraw.co/)
 - The Elixir MJML library that this library builds on top of [MJML](https://github.com/adoptoposs/mjml_nif)
 - The Rust MRML library that provides the MJML compilation functionality [MRML](https://github.com/jdrouet/mrml)
+
+
+## Contributing
+
+Clone the repository and run `mix git_hooks.install` to install the pre-commit hooks. Otherwise, you'll see errors like this when you commit your changes:
+
+```
+The dependency is not available, run "mix deps.get"
+```
