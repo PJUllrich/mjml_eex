@@ -66,6 +66,7 @@ defmodule MjmlEEx.MixProject do
       # Production deps
       {:mjml, "~> 4.0"},
       {:phoenix_html, "~> 3.2 or ~> 4.0"},
+      {:phoenix_live_view, ">= 0.18.0"},
       {:telemetry, "~> 1.0"},
       {:erlexec, "~> 2.0.7", optional: true},
 

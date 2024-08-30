@@ -4,7 +4,9 @@ defmodule MjmlEEx.Utils do
   Elixir expressions in MJML EEx templates.
   """
 
-  @mjml_eex_special_expressions [:render_static_component, :render_dynamic_component]
+  @mjml_eex_special_expressions [:render_static_component, :render_dynamic_component, :render_heex]
+
+  alias Phoenix.HTML.Safe
 
   @doc """
   This function encodes the internals of an MJML EEx document
@@ -51,6 +53,16 @@ defmodule MjmlEEx.Utils do
       error ->
         raise "Failed to tokenize EEx template: #{inspect(error)}"
     end
+  end
+
+  @doc false
+  def render_heex(module, opts, _caller) do
+    opts = if is_list(opts), do: Map.new(opts), else: opts
+
+    module
+    |> apply(:render, [opts])
+    |> Safe.to_iodata()
+    |> IO.iodata_to_binary()
   end
 
   @doc false

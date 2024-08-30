@@ -57,6 +57,27 @@ defmodule MjmlEEx.Engines.Mjml do
     raise "render_dynamic_component can only be invoked inside of an <%= ... %> expression"
   end
 
+  @impl true
+  def handle_expr(%{mode: :compile}, _marker, {:render_heex, _, _}) do
+    raise "render_heex can only be used with runtime generated templates. Switch your template to `mode: :runtime`"
+  end
+
+  def handle_expr(state, "=", {:render_heex, _, [{:__aliases__, _, _module} = aliases]}) do
+    module = Macro.expand(aliases, state.caller)
+
+    do_render_heex(state, module, [])
+  end
+
+  def handle_expr(state, "=", {:render_heex, _, [{:__aliases__, _, _module} = aliases, opts]}) do
+    module = Macro.expand(aliases, state.caller)
+
+    do_render_heex(state, module, opts)
+  end
+
+  def handle_expr(_state, _marker, {:render_heex, _, _}) do
+    raise "render_heex can only be invoked inside of an <%= ... %> expression"
+  end
+
   def handle_expr(state, "=", {:render_static_component, _, [{:__aliases__, _, _module} = aliases]}) do
     module = Macro.expand(aliases, state.caller)
 
@@ -98,6 +119,20 @@ defmodule MjmlEEx.Engines.Mjml do
 
     mjml_component =
       "<%= Phoenix.HTML.raw(MjmlEEx.Utils.render_dynamic_component(#{module}, #{Macro.to_string(opts)}, \"#{caller}\")) %>"
+
+    %{binary: binary} = state
+    %{state | binary: [mjml_component | binary]}
+  end
+
+  defp do_render_heex(state, module, opts) do
+    caller =
+      state
+      |> Map.get(:caller)
+      |> :erlang.term_to_binary()
+      |> Base.encode64()
+
+    mjml_component =
+      "<%= Phoenix.HTML.raw(MjmlEEx.Utils.render_heex(#{module}, #{Macro.to_string(opts)}, \"#{caller}\")) %>"
 
     %{binary: binary} = state
     %{state | binary: [mjml_component | binary]}

@@ -87,6 +87,21 @@ defmodule MjmlEExTest do
       mode: :compile
   end
 
+  # HEEX Examples
+  defmodule HEEX do
+    defmodule BasicTemplate do
+      use MjmlEEx,
+        mjml_template: "test_templates/heex/basic_template.mjml.heex",
+        mode: :runtime
+    end
+
+    defmodule InvalidTemplate do
+      use MjmlEEx,
+        mjml_template: "test_templates/heex/invalid_template.mjml.heex",
+        mode: :runtime
+    end
+  end
+
   describe "BasicTemplate.render/1" do
     test "should raise an error if no assigns are provided" do
       assert_raise ArgumentError, ~r/assign @call_to_action_text not available in template/, fn ->
@@ -368,6 +383,30 @@ defmodule MjmlEExTest do
             mode: :compile,
             mjml_layout: "invalid/path/to/layout.mjml.eex"
         end
+      end
+    end
+  end
+
+  describe "HEEX.BasicTemplate" do
+    test "should raise an error if no assigns are provided" do
+      assert_raise ArgumentError, ~r/assign @call_to_action_text not available in template/, fn ->
+        HEEX.BasicTemplate.render([])
+      end
+    end
+
+    test "should render the template and contain the proper text when passed assigns" do
+      result = HEEX.BasicTemplate.render(call_to_action_text: "Click me please!")
+      assert result =~ "Click me please!"
+
+      assert result =~
+               "HEEXComponent 2 says: <div style=\"font-family:Montserrat, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#000000;\">Hello to default.</div>"
+    end
+  end
+
+  describe "HEEX.InvalidTemplate" do
+    test "should raise an error because the 'index' variable wasn't set but is required" do
+      assert_raise KeyError, ~r/key :index not found in:/, fn ->
+        HEEX.InvalidTemplate.render([])
       end
     end
   end
